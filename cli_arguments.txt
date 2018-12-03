@@ -1,0 +1,5 @@
+Boot
+jade.Boot -gui -agents "agente_ruperto:agentes.MiAgente;agente_jacinto:agentes.MiAgente"
+
+Boot Distribuido
+jade.Boot -gui -container -host 192.168.43.93 -agents agente_ruperto:agentes.MiAgente
