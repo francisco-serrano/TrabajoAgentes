@@ -8,49 +8,52 @@ public class MiBehaviour extends Behaviour {
 
     private boolean termine = false;
     private int event = 1;
+    private String currentAgent;
+    private String senderName;
 
     @Override
     public void action() {
-        System.out.printf("El agente %s está activo\n", myAgent.getAID().getName());
 
         ACLMessage msgReceived = myAgent.receive(MessageTemplate.MatchAll());
-        if (msgReceived != null) {
+
+        if (msgReceived == null) {
+            block();
+        } else {
+            currentAgent = myAgent.getName().split("@")[0];
+            senderName = msgReceived.getSender().getName().split("@")[0];
 
             if (msgReceived.getPerformative() == ACLMessage.PROPOSE) {
-                System.out.println(myAgent.getName() + ": recibió PROPOSE");
+                System.out.printf("%s --> recibió PROPOSE de %s\n", currentAgent, senderName);
 
                 if (Math.random() > 0.5d) {
                     ACLMessage msgSend = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     msgSend.addReceiver(msgReceived.getSender());
                     myAgent.send(msgSend);
-                    System.out.println(myAgent.getName() + ": envía ACCEPT");
+                    System.out.println(currentAgent + " --> envía ACCEPT_PROPOSAL");
                 } else {
                     ACLMessage msgSend = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
                     msgSend.addReceiver(msgReceived.getSender());
                     myAgent.send(msgSend);
-                    System.out.println(myAgent.getName() + ": envía REJECT");
+                    System.out.println(currentAgent + " --> envía REJECT_PROPOSAL");
                 }
             }
 
             if (msgReceived.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-                System.out.println(myAgent.getName() + ": recibió ACCEPT");
+                System.out.println(currentAgent + " --> recibió ACCEPT_PROPOSAL");
                 termine = true;
                 event = 0;
             }
 
             if (msgReceived.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-                System.out.println(myAgent.getName() + ": recibió REJECT");
+                System.out.println(currentAgent + " --> recibió REJECT_PROPOSAL");
 
                 ACLMessage msgSend = new ACLMessage(ACLMessage.PROPOSE);
                 msgSend.addReceiver(msgReceived.getSender());
                 myAgent.send(msgSend);
-                System.out.println(myAgent.getName() + ": envía PROPOSE");
+                System.out.println(currentAgent + " --> envía PROPOSE");
 
                 event = 1;
             }
-
-        } else {
-            block();
         }
     }
 
@@ -61,7 +64,7 @@ public class MiBehaviour extends Behaviour {
 
     @Override
     public int onEnd() {
-        System.out.println(myAgent.getName() + ": finalizó la ejecución");
+        System.out.println(currentAgent + " --> finalizó la ejecución");
         return event;
     }
 
